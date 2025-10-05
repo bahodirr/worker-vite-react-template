@@ -30,17 +30,6 @@ app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'PUT', 'DELE
 userRoutes(app);
 app.get('/api/health', (c) => c.json({ success: true, data: { status: 'healthy', timestamp: new Date().toISOString() }}));
 
-app.post('/api/client-errors', async (c) => {
-  try {
-    const e = await c.req.json<ClientErrorReport>();
-    if (!e.message || !e.url || !e.userAgent) return c.json({ success: false, error: 'Missing required fields' }, 400);
-    console.error('[CLIENT ERROR]', JSON.stringify({ timestamp: e.timestamp || new Date().toISOString(), message: e.message, url: e.url, userAgent: e.userAgent, stack: e.stack, componentStack: e.componentStack, errorBoundary: e.errorBoundary, source: e.source, lineno: e.lineno, colno: e.colno }, null, 2));
-    return c.json({ success: true });
-  } catch (error) {
-    console.error('[CLIENT ERROR HANDLER] Failed:', error);
-    return c.json({ success: false, error: 'Failed to process' }, 500);
-  }
-});
 
 app.notFound((c) => c.json({ success: false, error: 'Not Found' }, 404));
 app.onError((err, c) => { console.error(`[ERROR] ${err}`); return c.json({ success: false, error: 'Internal Server Error' }, 500); });
