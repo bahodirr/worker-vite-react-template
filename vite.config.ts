@@ -14,6 +14,10 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
+  server: {
+    host: true,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+  },
   optimizeDeps: {
     include: ["react", "react-dom", "react-router-dom"],
     exclude: ["agents"],

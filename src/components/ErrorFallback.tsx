@@ -1,5 +1,5 @@
-import React from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { AlertTriangle, RefreshCw, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -22,6 +22,8 @@ export function ErrorFallback({
   showErrorDetails = true,
   statusMessage = "Our team has been notified"
 }: ErrorFallbackProps) {
+  const [copied, setCopied] = useState(false);
+
   const handleRetry = () => {
     if (onRetry) {
       onRetry();
@@ -38,64 +40,87 @@ export function ErrorFallback({
     }
   };
 
+  const copyText = useMemo(() => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const timestamp = new Date().toISOString();
+    const errorMessage = error?.message || (typeof error === 'string' ? error : 'Unknown error');
+    const errorStack = error?.stack || '';
+
+    return [
+      'Please help me debug this app error:',
+      '',
+      `Title: ${title}`,
+      `Message: ${message}`,
+      `Error Message: ${errorMessage}`,
+      errorStack ? `Stack:\n${errorStack}` : undefined,
+      `URL: ${url}`,
+      `User Agent: ${userAgent}`,
+      `Timestamp: ${timestamp}`,
+      '',
+      'Instructions: Suggest likely causes and next steps. Keep it concise.'
+    ].filter(Boolean).join('\n');
+  }, [error, title, message]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch (_) {
+      // Fallback: open a prompt to manually copy
+      window.prompt('Copy the error details below:', copyText);
+    }
+  };
+
+  const errorMessage = useMemo(() => (
+    error?.message || (typeof error === 'string' ? error : message)
+  ), [error, message]);
+  const errorStack = useMemo(() => (
+    error?.stack || ''
+  ), [error]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        {/* Animated background gradient */}
-        <div className="absolute inset-0 bg-gradient-rainbow opacity-5 dark:opacity-10" />
-        
-        {/* Error card */}
-        <Card className="relative backdrop-blur-sm shadow-2xl">
-          <CardContent className="p-8 space-y-6">
-            {/* Icon and title */}
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-destructive" />
+    <>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-sm">
+          <Card className="shadow-sm">
+            <CardContent className="p-5 space-y-4">
+              <div className="text-center space-y-2">
+                <div className="mx-auto w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                </div>
+              <h1 className="text-base font-semibold">{title}</h1>
+              <div className="relative text-left max-w-full pt-8 pr-12">
+                <Button onClick={handleCopy} variant="outline" className="absolute top-2 right-2 h-7 px-2 py-0 text-xs">
+                  <Copy className="w-3.5 h-3.5 mr-1" />
+                  {copied ? 'Copied' : 'Copy'}
+                </Button>
+                <pre className="whitespace-pre-wrap break-words font-mono text-xs text-muted-foreground bg-muted/50 rounded-md p-3">
+                  {errorMessage}
+                </pre>
               </div>
-              <h1 className="text-2xl font-bold">{title}</h1>
-              <p className="text-muted-foreground">{message}</p>
-            </div>
-
-            {/* Status indicator */}
-            {statusMessage && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                <span>{statusMessage}</span>
               </div>
-            )}
 
-            {/* Action buttons */}
-            <div className="space-y-3">
-              <Button onClick={handleRetry} className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-              <Button onClick={handleGoHome} variant="secondary" className="w-full">
-                <Home className="w-4 h-4 mr-2" />
-                Go to Homepage
-              </Button>
-            </div>
-
-            {/* Error details (collapsible) */}
-            {process.env.NODE_ENV === 'development' && showErrorDetails && error && (
-              <details className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                  Error details (Development only)
-                </summary>
-                <pre className="mt-3 text-xs overflow-auto max-h-40 text-muted-foreground">
-                  {error.message || error.toString()}
-                  {error.stack && '\n\n' + error.stack}
+              <div className="flex flex-col gap-2">
+                <Button onClick={handleRetry} className="w-full">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            {errorStack && (
+              <details className="text-left">
+                <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">Stack trace</summary>
+                <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-snug text-muted-foreground bg-muted/40 rounded-md p-3">
+                  {errorStack}
                 </pre>
               </details>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Support text */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          If this problem persists, please contact our support team
-        </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+      {/* Removed floating corner panel; copy remains near the message */}
+    </>
   );
 }

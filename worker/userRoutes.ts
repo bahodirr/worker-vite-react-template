@@ -2,17 +2,17 @@ import { Hono } from "hono";
 import { Env } from './core-utils';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-    // Add more routes like this. **DO NOT MODIFY CORS OR OVERRIDE ERROR HANDLERS**
-    app.get('/api/test', (c) => c.json({ success: true, data: { name: 'this works' }}));
+    // **DO NOT MODIFY CORS OR OVERRIDE ERROR HANDLERS**
 
     // Client error intake endpoint
     app.post('/api/client-errors', async (c) => {
         try {
+            console.log('Received client error');
             const e = await c.req.json<any>();
             if (!e?.message || !e?.url || !e?.userAgent) {
                 return c.json({ success: false, error: 'Missing required fields' }, 400);
             }
-            console.error('[CLIENT ERROR]', JSON.stringify({
+            console.error('[CLIENT BROWSER ERROR]', JSON.stringify({
                 timestamp: e.timestamp || new Date().toISOString(),
                 message: e.message,
                 url: e.url,

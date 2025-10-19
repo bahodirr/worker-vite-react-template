@@ -27,8 +27,10 @@ app.use('*', logger());
 
 app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], allowHeaders: ['Content-Type', 'Authorization'] }));
 
-userRoutes(app);
 app.get('/api/health', (c) => c.json({ success: true, data: { status: 'healthy', timestamp: new Date().toISOString() }}));
+
+// Register user-defined routes (including client error intake)
+userRoutes(app);
 
 
 app.notFound((c) => c.json({ success: false, error: 'Not Found' }, 404));
@@ -36,4 +38,4 @@ app.onError((err, c) => { console.error(`[ERROR] ${err}`); return c.json({ succe
 
 console.log(`Server is running`)
 
-export default { fetch: app.fetch } satisfies ExportedHandler<Env>;
+export default app;

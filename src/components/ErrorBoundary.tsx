@@ -72,6 +72,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <ErrorFallback
           error={this.state.error}
+          title="Something went wrong"
+          message="Try again or copy details for AI."
           onRetry={this.retry}
           onGoHome={this.goHome}
         />

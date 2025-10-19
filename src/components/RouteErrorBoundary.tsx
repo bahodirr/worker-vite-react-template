@@ -44,9 +44,9 @@ export function RouteErrorBoundary() {
     return (
       <ErrorFallback
         title={`${error.status} ${error.statusText}`}
-        message="Sorry, an error occurred while loading this page."
+        message="Try again or copy details for AI."
         error={error.data ? { message: JSON.stringify(error.data, null, 2) } : error}
-        statusMessage="Navigation error detected"
+        statusMessage="Navigation error"
       />
     );
   }
@@ -54,9 +54,9 @@ export function RouteErrorBoundary() {
   return (
     <ErrorFallback
       title="Unexpected Error"
-      message="An unexpected error occurred while loading this page."
+      message="Try again or copy details for AI."
       error={error}
-      statusMessage="Routing error detected"
+      statusMessage="Routing error"
     />
   );
 }

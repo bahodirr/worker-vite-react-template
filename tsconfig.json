@@ -1,19 +1,32 @@
 {
-	"extends": "./tsconfig.base.json",
-	"files": [],
-	"references": [
-		{
-			"path": "./tsconfig.app.json"
-		},
-		{
-			"path": "./tsconfig.node.json"
-		},
-		{
-			"path": "./tsconfig.worker.json"
-		}
-	],
 	"compilerOptions": {
-		"incremental": true,
-		"types": ["@cloudflare/workers-types"]
-	}
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"skipLibCheck": true,
+		"allowSyntheticDefaultImports": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@shared/*": ["./shared/*"]
+		},
+		"noUncheckedSideEffectImports": true,
+		"target": "ES2020",
+		"useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"types": ["vite/client"]
+	},
+	"include": [
+		"src",
+		"vite.config.ts"
+	],
+	"exclude": [
+		"dist",
+		"node_modules",
+		"worker"
+	]
 }

@@ -131,7 +131,7 @@ class GlobalErrorDeduplication {
   private lastCleanup = Date.now();
 
   private calculatePrecedence(context: ErrorContext): ErrorPrecedence {
-    const hasSourceCode = this.hasRelevantSourceCode(context.stack);
+    const hasSourceCode = hasRelevantSourceInStack(context.stack);
     const isWarning = context.level === "warning";
     const stackDepth = context.stack ? context.stack.split("\n").length : 0;
 
@@ -143,15 +143,6 @@ class GlobalErrorDeduplication {
     };
   }
 
-  private hasRelevantSourceCode(stack?: string): boolean {
-    if (!stack) return false;
-    return stack
-      .split("\n")
-      .some(
-        (line) =>
-          /\.tsx?$/.test(line) || /\.jsx?$/.test(line) || /\/src\//.test(line)
-      );
-  }
 
   private isHigherPrecedence(
     newPrec: ErrorPrecedence,
@@ -298,6 +289,8 @@ class ErrorReporter {
       this.setupUnhandledRejectionHandler();
 
       this.isInitialized = true;
+      // Signal bootstrap fallback to stop reporting
+      (window as unknown as { errorReporterReady?: boolean }).errorReporterReady = true;
     } catch (err) {
       console.error("[ErrorReporter] Failed to initialize:", err);
     }
@@ -414,9 +407,6 @@ class ErrorReporter {
   }
 
   private setupConsoleInterceptors() {
-    this.originalConsoleWarn = console.warn;
-    this.originalConsoleError = console.error;
-
     const currentWarn = console.warn as WrappedConsoleFn;
     const currentError = console.error as WrappedConsoleFn;
     // If already wrapped by immediate interceptors, do not wrap again
@@ -426,6 +416,10 @@ class ErrorReporter {
     ) {
       return;
     }
+
+    // Capture originals only if not already wrapped
+    this.originalConsoleWarn = console.warn;
+    this.originalConsoleError = console.error;
 
     console.error = this.createConsoleInterceptor(
       "error",
@@ -681,36 +675,14 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
   if (message.includes("[ErrorReporter]")) return false;
 
   // Skip React Router future flag warnings
-  const futurePatterns = [
-    /React Router Future Flag Warning/i,
-    /future flag to opt-in early/i,
-    /reactrouter\.com.*upgrading.*future/i,
-    /v7_\w+.*future flag/i,
-  ];
-  if (futurePatterns.some((pattern) => pattern.test(message))) return false;
+  if (isReactRouterFutureFlagMessage(message)) return false;
 
   // Skip deprecated React lifecycle warnings
-  const deprecatedPatterns = [
-    /componentWillReceiveProps/,
-    /componentWillMount/,
-    /componentWillUpdate/,
-    /UNSAFE_componentWill/,
-  ];
-  if (
-    level === "warning" &&
-    deprecatedPatterns.some((pattern) => pattern.test(message))
-  )
+  if (level === "warning" && isDeprecatedReactWarningMessage(message))
     return false;
 
   // For errors without proper source code, skip them
-  const hasSourceCode = stack
-    ? stack
-        .split("\n")
-        .some(
-          (line) =>
-            /\.tsx?$/.test(line) || /\.jsx?$/.test(line) || /\/src\//.test(line)
-        )
-    : false;
+  const hasSourceCode = hasRelevantSourceInStack(stack);
 
   // Skip uncaught errors without source code
   if (level === "error" && message.includes("Uncaught Error") && !hasSourceCode)
