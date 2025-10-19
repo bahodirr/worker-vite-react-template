@@ -1,0 +1,6 @@
+{
+  "scripts": {
+      "setup": "bun install",
+      "dev": "bun run dev:frontend"
+  }
+}
