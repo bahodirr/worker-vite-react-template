@@ -13,16 +13,7 @@ export function HomePage() {
         <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 text-left text-sm font-mono text-muted-foreground">
           {starterPrompt}
         </pre>
-        <div className="pt-2">
-          <button
-            className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:outline-none"
-            onClick={() => {
-              throw new Error('Test UI error: Button-induced crash for ErrorBoundary');
-            }}
-          >
-            Trigger UI Error
-          </button>
-        </div>
+        
       </div>
     </main>
   )

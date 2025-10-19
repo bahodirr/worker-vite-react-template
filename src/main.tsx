@@ -16,13 +16,7 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
-    path: "/test-route-error",
-    loader: async () => {
-      // Intentionally throw to test RouteErrorBoundary
-      throw new Response('Test Route Error from loader', { status: 500, statusText: 'Internal Server Error' });
-    },
-    element: <div className="p-6">This should not render due to loader error.</div>,
-    errorElement: <RouteErrorBoundary />,
+    
   },
 ]);
 
