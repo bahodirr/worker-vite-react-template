@@ -1,6 +1,7 @@
 {
   "scripts": {
-      "setup": "bun install",
-      "dev": "bun run dev:frontend"
+    "setup": "bun install",
+    "dev": "bun run dev",
+    "lint": "bun run lint"
   }
 }
