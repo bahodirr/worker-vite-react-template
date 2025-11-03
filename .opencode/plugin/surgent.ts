@@ -64,6 +64,8 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return { ok: true }
   }
 
+  // Simple: rely on pm2 to fetch logs directly
+
   return {
     tool: {
       // "devDeploy": tool({
@@ -87,6 +89,20 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
             return "Deployed successfully"
           } catch (error) {
             return `Deploy failed: ${(error as Error).message} JSON: ${JSON.stringify(error)}`
+          }
+        },
+      }),
+      "devLogs": tool({
+        description: "Show the last 200 lines of dev server PM2 logs using pm2 logs.",
+        args: {},
+        async execute(): Promise<string> {
+          try {
+            const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
+            const name = getNameFromSurgent(cfg) as string
+            const out = await $`pm2 logs ${name} --lines 200 --nostream`.text()
+            return out
+          } catch (error) {
+            return `Log fetch failed: ${(error as Error).message} JSON: ${JSON.stringify(error)}`
           }
         },
       }),
