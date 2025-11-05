@@ -50,10 +50,13 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return direct
   }
 
+  // Dev pipeline moved to package.json dev script; plugin only ensures process.
+
   async function runDev() {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
     if (!dev) throw new Error('Missing "scripts.dev" in surgent.json')
+    // Pipeline now runs inside package.json's dev command.
     const commands = toArray(dev)
     const configuredName = getNameFromSurgent(cfg)
     const baseName = configuredName
