@@ -53,22 +53,44 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return direct
   }
 
+  async function convexChanged(): Promise<boolean> {
+    try {
+      const out = await $`git status --porcelain convex/`.text()
+      return out.trim().length > 0
+    } catch {
+      // If git is unavailable, assume changed to be safe
+      return true
+    }
+  }
+
   async function runDev() {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
     if (!dev) throw new Error('Missing "scripts.dev" in surgent.json')
+    const changed = await convexChanged()
 
     // Run pipeline: codegen → lint → deploy
-    await $`bun run convex:codegen`
+    if (changed) {
+      await $`bun run convex:codegen`
+    }
     await $`bun run lint`
-    await $`bun run convex:once`
+    if (changed) {
+      await $`bun run convex:once`
+    }
 
     // Restart PM2 dev server
     const commands = Array.isArray(dev) ? dev : [dev]
     const configuredName = getNameFromSurgent(cfg)
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${configuredName}:${i + 1}` : configuredName
-      await startOrRestartPm2Process(name, commands[i])
+      if (changed) {
+        await startOrRestartPm2Process(name, commands[i])
+      } else {
+        const online = await isPm2Online(name)
+        if (!online) {
+          await $`${{ raw: `pm2 start "${commands[i]}" --name ${name}` }}`
+        }
+      }
     }
   }
 
