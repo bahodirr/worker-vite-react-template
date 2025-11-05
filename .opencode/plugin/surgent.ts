@@ -38,13 +38,14 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return status === "online"
   }
 
-  async function startOrRestartPm2Process(name: string, command: string) {
+  async function startOrRestartPm2Process(name: string, command: string): Promise<string> {
     const online = await isPm2Online(name)
     if (online) {
       await $`${{ raw: `pm2 restart ${name}` }}`
-      return
+      return `restarted ${name}`
     }
     await $`${{ raw: `pm2 start "${command}" --name ${name}` }}`
+    return `started ${name}`
   }
 
   function getNameFromSurgent(cfg: SurgentConfig | undefined): string {
@@ -63,19 +64,28 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     }
   }
 
-  async function runDev() {
+  async function runDev(): Promise<string> {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
     if (!dev) throw new Error('Missing "scripts.dev" in surgent.json')
     const changed = await convexChanged()
+    const steps: string[] = []
+
 
     // Run pipeline: codegen → lint → deploy
     if (changed) {
       await $`bun run convex:codegen`
+      steps.push("Ran convex:codegen")
+    } else {
+      steps.push("Skipped convex:codegen")
     }
     await $`bun run lint`
+    steps.push("Ran full lint")
     if (changed) {
       await $`bun run convex:once`
+      steps.push("Ran convex dev to sync changes")
+    } else {
+      steps.push("Skipped convex sync as no changes")
     }
 
     // Restart PM2 dev server
@@ -84,14 +94,20 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${configuredName}:${i + 1}` : configuredName
       if (changed) {
-        await startOrRestartPm2Process(name, commands[i])
+        const action = await startOrRestartPm2Process(name, commands[i])
+        steps.push(`PM2 ${action}`)
       } else {
         const online = await isPm2Online(name)
         if (!online) {
           await $`${{ raw: `pm2 start "${commands[i]}" --name ${name}` }}`
+          steps.push(`PM2 started ${name}`)
+        } else {
+          steps.push(`PM2 already online ${name}`)
         }
       }
     }
+    steps.push("Done")
+    return steps.join("\n")
   }
 
   // Simple: rely on pm2 to fetch logs directly
@@ -111,12 +127,12 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
       //   },
       // }),
       "dev": tool({
-        description: "Run the development vite server, Always run this after updating the codebase.",
+        description: "Run the dev pipeline: if convex/ changed → run convex codegen and convex dev; always run lint; then start or restart the run vite dev server. Use 'devLogs' to view recent logs.",
         args: {},
         async execute(): Promise<string> {
           try {
-            await runDev()
-            return "Dev pipeline complete (codegen → lint → convex:once → PM2 restart)"
+            const result = await runDev()
+            return result
           } catch (error) {
             const err = error as Error
             return `Failed error message: ${err.message}\n${err.stack?.toString()}`
