@@ -38,33 +38,38 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return status === "online"
   }
 
-  async function ensurePm2Process(name: string, command: string) {
+  async function startOrRestartPm2Process(name: string, command: string) {
     const online = await isPm2Online(name)
-    if (online) return
+    if (online) {
+      await $`${{ raw: `pm2 restart ${name}` }}`
+      return
+    }
     await $`${{ raw: `pm2 start "${command}" --name ${name}` }}`
   }
 
-  function getNameFromSurgent(cfg: SurgentConfig | undefined): string | undefined {
+  function getNameFromSurgent(cfg: SurgentConfig | undefined): string {
     const direct = cfg?.name?.trim()
     if (!direct) throw new Error('Missing "name" in surgent.json')
     return direct
   }
 
-  // Dev pipeline moved to package.json dev script; plugin only ensures process.
-
   async function runDev() {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
     if (!dev) throw new Error('Missing "scripts.dev" in surgent.json')
-    // Pipeline now runs inside package.json's dev command.
-    const commands = toArray(dev)
+
+    // Run pipeline: codegen → lint → deploy
+    await $`bun run convex:codegen`
+    await $`bun run lint`
+    await $`bun run convex:once`
+
+    // Restart PM2 dev server
+    const commands = Array.isArray(dev) ? dev : [dev]
     const configuredName = getNameFromSurgent(cfg)
-    const baseName = configuredName
     for (let i = 0; i < commands.length; i++) {
-      const name = commands.length > 1 ? `${baseName}:${i + 1}` : baseName
-      await ensurePm2Process(name as string, commands[i])
+      const name = commands.length > 1 ? `${configuredName}:${i + 1}` : configuredName
+      await startOrRestartPm2Process(name, commands[i])
     }
-    return { ok: true }
   }
 
   // Simple: rely on pm2 to fetch logs directly
@@ -89,9 +94,10 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
         async execute(): Promise<string> {
           try {
             await runDev()
-            return "Deployed successfully"
+            return "Dev pipeline complete (codegen → lint → convex:once → PM2 restart)"
           } catch (error) {
-            return `Deploy failed: ${(error as Error).message} JSON: ${JSON.stringify(error)}`
+            const err = error as Error
+            return `Failed error message: ${err.message}\n${err.stack?.toString()}`
           }
         },
       }),

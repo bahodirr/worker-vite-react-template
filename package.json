@@ -4,8 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "bun run dev:init && vite",
-		"dev:init": "bun run convex:codegen && bun run lint && bun run convex:once",
+		"dev": "vite",
 		"convex:once": "convex dev --once --typecheck=disable",
 		"convex:codegen": "convex codegen",
 		"build": "vite build",
