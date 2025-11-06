@@ -64,24 +64,22 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     }
   }
 
-  async function runDev(): Promise<string> {
+  async function runDev({syncConvex = true}: {syncConvex?: boolean}): Promise<string> {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
     if (!dev) throw new Error('Missing "scripts.dev" in surgent.json')
-    const changed = await convexChanged()
     const steps: string[] = []
 
-
-    // Run pipeline: codegen → lint → deploy
-    if (changed) {
-      await $`bun run convex:codegen`
-      steps.push("Ran convex:codegen")
-    } else {
+    if (syncConvex) {
+        await $`bun run convex:codegen`
+        steps.push("Ran convex:codegen")
+    }else{
       steps.push("Skipped convex:codegen")
     }
     await $`bun run lint`
     steps.push("Ran full lint")
-    if (changed) {
+
+    if (syncConvex) {
       await $`bun run convex:once`
       steps.push("Ran convex dev to sync changes")
     } else {
@@ -105,11 +103,11 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
   return {
     tool: {
       "dev": tool({
-        description: "Ensures the development server is running. Syncs convex if needed and runs lint.",
-        args: {},
-        async execute(): Promise<string> {
+        description: "Ensures the development server is running. Syncs convex if needed and runs lint. Args: syncConvex (default false) to specify if convex should be synced.",
+        args: { syncConvex: z.boolean().default(false) },
+        async execute(args): Promise<string> {
           try {
-            const result = await runDev()
+            const result = await runDev({syncConvex: args.syncConvex})
             return result
           } catch (error) {
             const err = error as Error
