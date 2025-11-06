@@ -19,7 +19,7 @@ export default defineConfig({
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom"],
+    include: ["react", "react-router"],
     exclude: ["agents"],
   },
   define: {

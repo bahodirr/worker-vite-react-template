@@ -1,6 +1,6 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,18 @@ export function SignIn() {
         navigate("/");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Sign in failed");
+      const raw = error instanceof Error ? error.message : String(error);
+      let friendly = "Sign in failed";
+      if (raw.includes("InvalidAccountId")) {
+        friendly = "No account found for this email. Try Sign Up.";
+      } else if (raw.includes("InvalidSecret") || raw.includes("Invalid credentials")) {
+        friendly = "Incorrect password.";
+      } else if (raw.includes("TooManyFailedAttempts")) {
+        friendly = "Too many failed attempts. Try again later.";
+      } else if (raw.includes("Provider") && raw.includes("not configured")) {
+        friendly = "Auth provider not configured on the server.";
+      }
+      toast.error(friendly);
     } finally {
       setLoading(false);
     }

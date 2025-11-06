@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export function SignUp() {
   const { signIn } = useAuthActions();
@@ -24,6 +24,19 @@ export function SignUp() {
         toast.success("Signed up successfully!");
         navigate("/");
       }
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : String(error);
+      let friendly = "Sign up failed";
+      if (raw.includes("already exists")) {
+        friendly = "An account with this email already exists. Try Sign In.";
+      } else if (raw.includes("Invalid password")) {
+        friendly = "Password must be at least 8 characters.";
+      } else if (raw.includes("Missing `password`")) {
+        friendly = "Password is required.";
+      } else if (raw.includes("Missing `flow`")) {
+        friendly = "Internal error: missing sign-up flow.";
+      }
+      toast.error(friendly);
     } finally {
       setLoading("");
     }
