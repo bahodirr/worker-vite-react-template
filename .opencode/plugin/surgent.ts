@@ -1,4 +1,5 @@
 import { type Plugin, tool } from "@opencode-ai/plugin"
+import { z } from "zod"
 
 type SurgentConfig = {
   name?: string
@@ -114,20 +115,8 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
 
   return {
     tool: {
-      // "devDeploy": tool({
-      //   description: "Run development deploy commands from surgent.json (no args). Always after updating the codebase.",
-      //   args: {},
-      //   async execute(): Promise<string> {
-      //     try {
-      //       await deployOnce()
-      //       return "Deployed successfully"
-      //     } catch (error) {
-      //       return `Deploy failed: ${(error as Error).message} JSON: ${JSON.stringify(error)}`
-      //     }
-      //   },
-      // }),
       "dev": tool({
-        description: "Run the dev pipeline: if convex/ changed → run convex codegen and convex dev; always run lint; then start or restart the run vite dev server. Use 'devLogs' to view recent logs.",
+        description: "Ensures the development server is running. Syncs convex if needed and runs lint.",
         args: {},
         async execute(): Promise<string> {
           try {
@@ -140,13 +129,13 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
         },
       }),
       "devLogs": tool({
-        description: "Show the last 200 lines of dev server PM2 logs using pm2 logs.",
-        args: {},
-        async execute(): Promise<string> {
+        description: "Show the last N lines of dev server PM2 logs using pm2 logs. Args: lines (default 20) to specify the number of lines to show.",
+        args: { lines: z.number().default(20) },
+        async execute(args): Promise<string> {
           try {
             const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
             const name = getNameFromSurgent(cfg) as string
-            const out = await $`pm2 logs ${name} --lines 200 --nostream`.text()
+            const out = await $`pm2 logs ${name} --lines ${args.lines} --nostream`.text()
             return out
           } catch (error) {
             return `Log fetch failed: ${(error as Error).message} JSON: ${JSON.stringify(error)}`
