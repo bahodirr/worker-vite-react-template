@@ -20,10 +20,6 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     } 
   }
 
-  function toArray<T>(value: T | T[]): T[] {
-    return Array.isArray(value) ? value : [value]
-  }
-
   async function pm2JList(): Promise<any[]> {
     try {
       return await $`pm2 jlist`.json()
