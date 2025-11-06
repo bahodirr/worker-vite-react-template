@@ -5,13 +5,7 @@ export function HomePage() {
   // const { isAuthenticated, isLoading } = useConvexAuth();
 
   return (
-    <main className="flex min-h-screen bg-background">
-      <header className="w-full border-b">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Your App</h1>
-          {/* <UserMenu /> */}
-        </div>
-      </header>
+    <main className="flex min-h-screen flex-col bg-background">
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="w-full max-w-xl space-y-6 text-center">
           <h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">

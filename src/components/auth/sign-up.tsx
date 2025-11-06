@@ -43,51 +43,70 @@ export function SignUp() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign Up</CardTitle>
-        <CardDescription>Create a new account to get started</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading === "signUp"}>
-            {loading === "signUp" ? "Creating account..." : "Sign Up"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <Card className="w-full max-w-md border-0 shadow-none rounded-xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl">Create account</CardTitle>
+          <CardDescription>It’s quick and easy. Start by entering your details.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading === "signUp"}>
+              {loading === "signUp" ? "Creating account..." : "Sign Up"}
+            </Button>
+          </form>
+        </CardContent>
+        <div className="px-6 pb-6 text-center text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/sign-in')}
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Sign in
+          </button>
+        </div>
+      </Card>
+    </div>
   );
 }
 

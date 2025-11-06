@@ -1,6 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { User } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,53 +57,71 @@ export function SignIn() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <Card className="w-full max-w-md border-0 shadow-none rounded-xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl">Sign in</CardTitle>
+          <CardDescription>Welcome back. Use your email and password.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoFocus
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+
+          <div className="flex items-center gap-4 my-4">
+            <Separator className="flex-1" />
+            <span className="text-sm text-muted-foreground">or</span>
+            <Separator className="flex-1" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleAnonymousSignIn}
+            disabled={loading}
+          >
+            <User className="mr-2 h-4 w-4" /> Continue as guest
           </Button>
-        </form>
-
-        <div className="flex items-center gap-4 my-4">
-          <Separator className="flex-1" />
-          <span className="text-sm text-muted-foreground">or</span>
-          <Separator className="flex-1" />
+        </CardContent>
+        <div className="px-6 pb-6 text-center text-sm text-muted-foreground">
+          Don't have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/sign-up')}
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            Sign up
+          </button>
         </div>
-
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          onClick={handleAnonymousSignIn}
-          disabled={loading}
-        >
-          Sign in anonymously
-        </Button>
-      </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }
 

@@ -8,7 +8,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { ErrorBoundary } from '@/components/error-boundary';
 import { RouteErrorBoundary } from '@/components/route-error-boundary';
-import { HomePage } from '@/pages/HomePage'
+import { HomePage } from '@/pages/home'
 import '@/index.css'
 import { SignIn } from '@/components/auth/sign-in';
 import { SignUp } from '@/components/auth/sign-up';

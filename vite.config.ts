@@ -2,9 +2,10 @@ import { defineConfig } from "vite";
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react(), cloudflare()],
+  plugins: [react(), cloudflare(), tailwindcss()],
   css: {
     devSourcemap: true,
   },
