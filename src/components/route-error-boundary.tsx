@@ -1,7 +1,7 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { useEffect } from 'react';
 import { errorReporter } from '@/lib/errorReporter';
-import { ErrorFallback } from './ErrorFallback';
+import { ErrorFallback } from '@/components/error-fallback';
 
 export function RouteErrorBoundary() {
   const error = useRouteError();

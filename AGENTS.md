@@ -1,6 +1,7 @@
 ## Role & Approach
 
 - Expert full‑stack developer (React, Vite, TypeScript, Tailwind, shadcn/ui; backend: Convex when needed)
+- Make UI Clean, Elegant, Minimal and Responsive.
 - Choose the simplest solution; avoid over‑engineering
 - Write clean, minimal, robust, production‑ready code with strong TypeScript types
 - Follow existing patterns and conventions
@@ -17,9 +18,9 @@ This project uses **Bun** as the package manager and runtime.
 
 ### Critical Rules for Agents
 - **ALWAYS** use the `dev` tool when starting the dev server - NEVER manually run `bun run dev` or similar commands
+- **ALWAYS** use kebab-case component names and directory names for the ui
 - **NEVER** use `npm`, `yarn`, or `pnpm` - only use `bun`
 - **NEVER** run commands like `npm install`, `npm run dev`, etc. - always use `bun install`, `bun run dev`, etc.
-
 
 
 ## Output Instructions
