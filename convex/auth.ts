@@ -20,3 +20,5 @@ export const loggedInUser = query({
     return user;
   },
 });
+
+// refer to https://labs.convex.dev/auth/setup for more information
