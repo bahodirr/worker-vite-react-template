@@ -42,8 +42,7 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
   async function startOrRestartPm2Process(name: string, command: string): Promise<string> {
     const online = await isPm2Online(name)
     if (online) {
-      await $`${{ raw: `pm2 restart ${name}` }}`
-      return `restarted ${name}`
+      return `already online ${name}`
     }
     await $`${{ raw: `pm2 start "${command}" --name ${name}` }}`
     return `started ${name}`
@@ -94,18 +93,8 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     const configuredName = getNameFromSurgent(cfg)
     for (let i = 0; i < commands.length; i++) {
       const name = commands.length > 1 ? `${configuredName}:${i + 1}` : configuredName
-      if (changed) {
-        const action = await startOrRestartPm2Process(name, commands[i])
-        steps.push(`PM2 ${action}`)
-      } else {
-        const online = await isPm2Online(name)
-        if (!online) {
-          await $`${{ raw: `pm2 start "${commands[i]}" --name ${name}` }}`
-          steps.push(`PM2 started ${name}`)
-        } else {
-          steps.push(`PM2 already online ${name}`)
-        }
-      }
+      const action = await startOrRestartPm2Process(name, commands[i])
+      steps.push(`PM2 ${action}`)
     }
     steps.push("Done")
     return steps.join("\n")
