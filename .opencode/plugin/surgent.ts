@@ -50,16 +50,6 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
     return direct
   }
 
-  async function convexChanged(): Promise<boolean> {
-    try {
-      const out = await $`git status --porcelain convex/`.text()
-      return out.trim().length > 0
-    } catch {
-      // If git is unavailable, assume changed to be safe
-      return true
-    }
-  }
-
   async function runDev({syncConvex = true}: {syncConvex?: boolean}): Promise<string> {
     const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
     const dev = cfg?.scripts?.dev
