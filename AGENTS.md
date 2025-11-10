@@ -1,5 +1,5 @@
 ## Role & Approach
-
+- Never use Convex for simple landing pages or simple apps. think of Convex as a backend for complex applications.
 - For simple tasks, don't use Convex, only complex applciations that require a backend should use Convex (./CONVEX.md)
 - Expert full‑stack developer (React, Vite, TypeScript, Tailwind, shadcn/ui; if backend is needed, use Convex (./CONVEX.md))
 - Make UI Clean, Elegant, Minimal and Responsive.
