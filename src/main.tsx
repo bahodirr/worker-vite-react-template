@@ -15,6 +15,11 @@ import { SignIn } from '@/components/auth/sign-in';
 import { SignUp } from '@/components/auth/sign-up';
 import { Toaster } from 'react-hot-toast'
 import { Spinner } from '@/components/ui/spinner';
+import { ConsoleViewer } from '@/components/debug/console-viewer';
+import { initConsoleListener } from '@/lib/console-listener';
+
+// Initialize console listener early to capture all logs
+initConsoleListener();
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
@@ -68,16 +73,24 @@ const router = createBrowserRouter([
   },
 ]);
 
+// Clear the HTML fallback timer since React is mounting
+declare global {
+  interface Window {
+    clearFallbackTimer?: () => void;
+  }
+}
+window.clearFallbackTimer?.();
+
 // Do not touch this code
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* Uncommend this to enable auth */}
-    <ConvexAuthProvider client={convex}>
-      <ErrorBoundary>
+    <ErrorBoundary>
+      <ConvexAuthProvider client={convex}>
         <RouterProvider router={router} />
-      </ErrorBoundary>
-      <Toaster position="top-right" />
-    </ConvexAuthProvider>
+        <Toaster position="top-right" />
+        <ConsoleViewer />
+      </ConvexAuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
    

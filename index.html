@@ -8,13 +8,35 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Fallback UI shown if React fails to mount -->
+    <div id="app-error-fallback" style="display:none;position:fixed;inset:0;background:#0a0a0a;color:#fafafa;font-family:system-ui,sans-serif;padding:2rem;">
+      <div style="max-width:28rem;margin:auto;padding-top:20vh;text-align:center;">
+        <div style="width:3rem;height:3rem;margin:0 auto 1rem;background:rgba(239,68,68,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <svg width="24" height="24" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h1 style="font-size:1.25rem;font-weight:600;margin:0 0 0.5rem;">Unable to load app</h1>
+        <p style="color:#a1a1a1;font-size:0.875rem;margin:0 0 1.5rem;">Something went wrong during startup.</p>
+        <button onclick="location.reload()" style="background:#fff;color:#0a0a0a;border:none;padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.875rem;cursor:pointer;">Refresh Page</button>
+      </div>
+    </div>
     <script>
+        // Show fallback UI if app doesn't mount within 10 seconds
+        var fallbackTimer = setTimeout(function() {
+          if (!window.errorReporterReady) {
+            document.getElementById('app-error-fallback').style.display = 'block';
+          }
+        }, 10000);
+        
         window.addEventListener('error', (event) => {
           if (window.errorReporterReady) {
             return; // app reporter active; skip bootstrap fallback
           }
           const isOurAppError = event.filename && event.filename.startsWith(window.location.origin);
           if (isOurAppError) {
+            // Show fallback immediately on critical error
+            clearTimeout(fallbackTimer);
+            document.getElementById('app-error-fallback').style.display = 'block';
+            
             navigator.sendBeacon('/api/client-errors', JSON.stringify({
               message: event.message,
               url: window.location.href,
@@ -27,6 +49,9 @@
             }));
           }
         }, true);
+        
+        // Clear timer when app mounts successfully
+        window.clearFallbackTimer = function() { clearTimeout(fallbackTimer); };
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
