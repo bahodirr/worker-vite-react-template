@@ -6,15 +6,15 @@ import {
   Navigate,
 } from "react-router";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ConvexReactClient, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { ConvexReactClient, Authenticated, Unauthenticated } from "convex/react";
 import { ErrorBoundary } from '@/components/error-boundary';
 import { RouteErrorBoundary } from '@/components/route-error-boundary';
-import { HomePage } from '@/pages/home'
+import { LandingPage } from '@/pages/landing'
+import { DashboardPage } from '@/pages/dashboard'
 import '@/index.css'
 import { SignIn } from '@/components/auth/sign-in';
 import { SignUp } from '@/components/auth/sign-up';
 import { Toaster } from 'react-hot-toast'
-import { Spinner } from '@/components/ui/spinner';
 import { ConsoleViewer } from '@/components/debug/console-viewer';
 import { initConsoleListener } from '@/lib/console-listener';
 
@@ -26,21 +26,12 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <>
-        <AuthLoading>
-          <div className="min-h-screen flex items-center justify-center">
-            <Spinner className="h-6 w-6" />
-          </div>
-        </AuthLoading>
-        <Authenticated>
-          <HomePage />
-        </Authenticated>
-        <Unauthenticated>
-          <Navigate to="/sign-in" replace />
-        </Unauthenticated>
-      </>
-    ),
+    element: <LandingPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {
@@ -48,7 +39,7 @@ const router = createBrowserRouter([
     element: (
       <>
         <Authenticated>
-          <Navigate to="/" replace />
+          <Navigate to="/dashboard" replace />
         </Authenticated>
         <Unauthenticated>
           <SignIn />
@@ -62,7 +53,7 @@ const router = createBrowserRouter([
     element: (
       <>
         <Authenticated>
-          <Navigate to="/" replace />
+          <Navigate to="/dashboard" replace />
         </Authenticated>
         <Unauthenticated>
           <SignUp />

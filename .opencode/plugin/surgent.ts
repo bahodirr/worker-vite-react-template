@@ -1,6 +1,4 @@
 import { type Plugin, tool } from "@opencode-ai/plugin"
-import { z } from "zod"
-
 type SurgentConfig = {
   name?: string
   scripts?: {
@@ -88,9 +86,9 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
 
   return {
     tool: {
-      "dev": tool({
+      dev: tool({
         description: "Ensures the development server is running. Syncs convex if needed and runs lint. Args: syncConvex (default false) to specify if convex should be synced.",
-        args: { syncConvex: z.boolean().default(false) },
+        args: { syncConvex: tool.schema.boolean().default(false) },
         async execute(args): Promise<string> {
           try {
             const result = await runDev({syncConvex: args.syncConvex})
@@ -101,9 +99,9 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
           }
         },
       }),
-      "devLogs": tool({
+      devLogs: tool({
         description: "Show the last N lines of dev server PM2 logs using pm2 logs. Args: lines (default 20) to specify the number of lines to show.",
-        args: { lines: z.number().default(20) },
+        args: { lines: tool.schema.number().default(20) },
         async execute(args): Promise<string> {
           try {
             const cfg: SurgentConfig = await readJSONIfExists(`${directory}/surgent.json`)
@@ -116,6 +114,30 @@ export const SurgentDeployPlugin: Plugin = async ({ $, directory }) => {
         },
       }),
     },
+    downloadToRepo: tool({
+      description: "Download a file from a URL and save it to the project. Use for downloading images, assets, or files. targetPath is relative to project root (e.g. 'public/logo.png', 'src/assets/image.jpg'). Do NOT use absolute paths.",
+      args: {
+        sourceUrl: tool.schema.string(),
+        targetPath: tool.schema.string(),
+      },
+      async execute(args): Promise<string> {
+        try {
+          const sourceUrl = args.sourceUrl?.trim()
+          const targetPath = args.targetPath?.trim()
+
+          if (!sourceUrl) return "Missing sourceUrl"
+          if (!targetPath) return "Missing targetPath"
+
+          const fullPath = `${directory}/${targetPath}`
+          await $`curl -L --create-dirs -o ${fullPath} ${sourceUrl}`
+
+          return `Downloaded ${sourceUrl} to ${targetPath}`
+        } catch (error) {
+          const err = error as Error
+          return `Download failed: ${err.message}`
+        }
+      },
+    }),
   }
 }
 

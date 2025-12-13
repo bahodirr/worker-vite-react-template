@@ -1,15 +1,36 @@
 import { useQuery } from "convex/react";
+import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { Navigate } from "react-router";
 import { api } from "../../convex/_generated/api";
 import { UserMenu } from "@/components/auth/user-menu";
+import { Spinner } from "@/components/ui/spinner";
 
-export function HomePage() {
+export function DashboardPage() {
+  return (
+    <>
+      <AuthLoading>
+        <div className="min-h-screen flex items-center justify-center">
+          <Spinner className="h-6 w-6" />
+        </div>
+      </AuthLoading>
+      <Authenticated>
+        <DashboardContent />
+      </Authenticated>
+      <Unauthenticated>
+        <Navigate to="/sign-in" replace />
+      </Unauthenticated>
+    </>
+  );
+}
+
+function DashboardContent() {
   const user = useQuery(api.auth.loggedInUser);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b">
         <div className="mx-auto h-14 max-w-7xl px-6 flex items-center justify-between">
-          <h1 className="text-lg font-semibold">Home</h1>
+          <h1 className="text-lg font-semibold">Dashboard</h1>
           <UserMenu />
         </div>
       </header>
