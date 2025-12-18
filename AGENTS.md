@@ -14,7 +14,6 @@ This project uses **Bun** as the package manager and runtime.
 ### Core Commands
 - `bun install` - Install dependencies
 - `bun add <package>` - Add a dependency
-- `bun run dev` - Run the development server
 - `bun run lint` - Run TypeScript type checking across all projects
 
 ### Critical Rules for Agents
@@ -23,6 +22,12 @@ This project uses **Bun** as the package manager and runtime.
 - **NEVER** use `npm`, `yarn`, or `pnpm` - only use `bun`
 - **NEVER** run commands like `npm install`, `npm run dev`, etc. - always use `bun install`, `bun run dev`, etc.
 
+
+## Running Development Server
+
+Run the development server with the `dev` tool.
+
+NEVER try to manually run the development server. Use the `dev` tool instead.
 
 ## Output Instructions
 
